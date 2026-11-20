@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 應用推動與風險管理｜研究結案</title>
+  <style>
+    :root {
+      --navy-950: #081b2b;
+      --navy-900: #102a43;
+      --navy-700: #244a64;
+      --teal-700: #0b6e69;
+      --teal-100: #dcefed;
+      --burgundy-700: #7b1e2d;
+      --burgundy-100: #f4e3e6;
+      --gold-500: #b8892e;
+      --ink: #18232d;
+      --muted: #5b6873;
+      --line: #d4dce2;
+      --paper: #f7f8f9;
+      --white: #ffffff;
+      --canvas-w: 1600;
+      --canvas-h: 900;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #07131f;
+      color: var(--ink);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
+    }
+
+    button, a { font: inherit; }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 20px 24px 72px;
+    }
+
+    .stage {
+      position: relative;
+      width: 1600px;
+      height: 900px;
+      transform-origin: top left;
+      background: var(--paper);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .42);
+      overflow: hidden;
+    }
+
+    .stage-wrap {
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      overflow: hidden;
+      background: var(--paper);
+    }
+
+    .slide.active { display: block; }
+
+    .slide-inner {
+      height: 100%;
+      padding: 74px 92px 64px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slide-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 44px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid var(--line);
+    }
+
+    .kicker {
+      margin: 0 0 10px;
+      color: var(--burgundy-700);
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1, h2 {
+      margin-bottom: 0;
+      color: var(--navy-900);
+      font-family: "Noto Serif TC", "PMingLiU", serif;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    h1 { font-size: 67px; line-height: 1.16; }
+    h2 { font-size: 46px; line-height: 1.2; }
+    h3 { margin-bottom: 12px; font-size: 25px; line-height: 1.32; color: var(--navy-900); }
+
+    .head-rule {
+      position: relative;
+      width: 116px;
+      height: 6px;
+      margin-top: 16px;
+      background: var(--teal-700);
+    }
+
+    .head-rule::after { content: ""; position: absolute; top: 0; right: 0; width: 43px; height: 6px; background: var(--burgundy-700); }
+
+    .section-code {
+      flex: 0 0 auto;
+      min-width: 98px;
+      color: var(--navy-700);
+      font-size: 18px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .content {
+      flex: 1;
+      min-height: 0;
+      padding-top: 32px;
+    }
+
+    .footer {
+      position: absolute;
+      left: 92px;
+      right: 92px;
+      bottom: 26px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #68737c;
+      font-size: 15px;
+    }
+
+    .footer strong { color: var(--navy-700); }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 31px;
+      padding: 4px 11px;
+      border-radius: 4px;
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .pill.confirmed { background: var(--teal-100); color: #075854; }
+    .pill.ongoing { background: #e8edf2; color: var(--navy-700); }
+    .pill.next { background: var(--burgundy-100); color: var(--burgundy-700); }
+
+    .accent { color: var(--burgundy-700); }
+    .teal { color: var(--teal-700); }
+    .muted { color: var(--muted); }
+    .serif { font-family: "Noto Serif TC", "PMingLiU", serif; }
+
+    .cover {
+      color: var(--white);
+      background: url("assets/ai-governance-port-cover.png") center center / cover no-repeat;
+    }
+
+    .cover::before { content: ""; position: absolute; inset: 0 37% 0 0; background: rgba(5, 20, 34, .76); clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%); }
+
+    .cover .slide-inner { position: relative; z-index: 1; padding: 88px 102px 72px; }
+
+    .cover-mark {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .cover-mark::before {
+      content: "";
+      width: 42px;
+      height: 5px;
+      background: var(--teal-700);
+      box-shadow: 48px 0 0 var(--burgundy-700);
+    }
+
+    .cover-copy {
+      width: 830px;
+      margin-top: 142px;
+    }
+
+    .cover h1 { color: var(--white); text-shadow: 0 3px 18px rgba(0, 0, 0, .28); }
+
+    .cover-subtitle {
+      margin: 26px 0 0;
+      font-size: 29px;
+      line-height: 1.5;
+      color: #e6edf2;
+      font-weight: 500;
+    }
+
+    .cover-meta {
+      margin-top: auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, .46);
+      padding-top: 20px;
+      font-size: 18px;
+      color: #eef3f6;
+    }
+
+    .cover-meta strong { display: block; margin-bottom: 6px; font-size: 21px; }
+
+    .thesis {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      height: 100%;
+      gap: 54px;
+      align-items: stretch;
+    }
+
+    .thesis-main {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 20px 54px 20px 0;
+      border-right: 1px solid var(--line);
+    }
+
+    .thesis-label {
+      margin-bottom: 22px;
+      color: var(--teal-700);
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    .thesis-quote {
+      margin: 0;
+      color: var(--navy-900);
+      font-family: "Noto Serif TC", "PMingLiU", serif;
+      font-size: 51px;
+      font-weight: 800;
+      line-height: 1.42;
+    }
+
+    .thesis-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .question-block {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .question-block:last-child { border-bottom: 0; }
+    .question-block span { display: block; margin-bottom: 10px; color: var(--burgundy-700); font-size: 16px; font-weight: 800; }
+    .question-block p { margin: 0; font-size: 24px; line-height: 1.55; }
+
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      height: 100%;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .evidence-item {
+      position: relative;
+      padding: 34px 27px;
+      border-right: 1px solid var(--line);
+    }
+
+    .evidence-item:last-child { border-right: 0; }
+    .evidence-item::before { content: ""; position: absolute; left: 27px; top: 0; width: 52px; height: 6px; background: var(--teal-700); }
+    .evidence-item:nth-child(2)::before, .evidence-item:nth-child(4)::before { background: var(--burgundy-700); }
+
+    .evidence-no { color: #8a959d; font-size: 52px; font-weight: 300; line-height: 1; }
+    .evidence-item h3 { margin-top: 28px; }
+    .evidence-item p { margin-bottom: 0; color: var(--muted); font-size: 20px; line-height: 1.65; }
+
+    .source-note {
+      margin-top: 20px;
+      color: #6e7982;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .source-note a { color: var(--navy-700); text-decoration: underline; text-underline-offset: 3px; }
+
+    .current-state {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      height: 100%;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .year-panel {
+      height: 100%;
+      padding: 42px 48px;
+      background: var(--navy-900);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .year-panel .year { font-size: 104px; font-weight: 200; line-height: 1; }
+    .year-panel .label { margin-top: 14px; color: #cfe5e3; font-size: 24px; font-weight: 800; }
+    .year-panel p { margin: 34px 0 0; font-size: 26px; line-height: 1.6; }
+
+    .fact-list { display: grid; gap: 0; }
+
+    .fact-row {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 24px;
+      padding: 26px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .fact-row:last-child { border-bottom: 0; }
+    .fact-index { color: var(--burgundy-700); font-size: 21px; font-weight: 800; }
+    .fact-row strong { display: block; margin-bottom: 8px; color: var(--navy-900); font-size: 26px; }
+    .fact-row p { margin: 0; color: var(--muted); font-size: 20px; line-height: 1.5; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin-top: 10px;
+      border: 1px solid var(--line);
+    }
+
+    .flow-step {
+      position: relative;
+      min-height: 224px;
+      padding: 30px 26px;
+      border-right: 1px solid var(--line);
+      background: var(--white);
+    }
+
+    .flow-step:last-child { border-right: 0; background: #f8ecee; }
+    .flow-step:not(:last-child)::after {
+      content: "›";
+      position: absolute;
+      z-index: 2;
+      right: -18px;
+      top: 78px;
+      width: 36px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      background: var(--paper);
+      color: var(--burgundy-700);
+      font-size: 47px;
+      line-height: 1;
+    }
+
+    .flow-step small { color: var(--teal-700); font-size: 15px; font-weight: 800; }
+    .flow-step h3 { margin-top: 18px; font-size: 25px; }
+    .flow-step p { margin-bottom: 0; color: var(--muted); font-size: 18px; line-height: 1.5; }
+
+    .risk-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      margin-top: 30px;
+      border-top: 5px solid var(--burgundy-700);
+      background: var(--navy-900);
+      color: var(--white);
+    }
+
+    .risk-item { padding: 21px 24px; border-right: 1px solid rgba(255, 255, 255, .2); }
+    .risk-item:last-child { border-right: 0; }
+    .risk-item strong { display: block; margin-bottom: 6px; color: #e7bfc6; font-size: 18px; }
+    .risk-item span { font-size: 17px; color: #e7edf1; }
+
+    .principle {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .principle-line {
+      margin: 0 auto 45px;
+      max-width: 1230px;
+      text-align: center;
+      color: var(--navy-900);
+      font-family: "Noto Serif TC", "PMingLiU", serif;
+      font-size: 45px;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .principle-line mark { background: transparent; color: var(--burgundy-700); }
+
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .pillar { padding: 30px 36px; border-right: 1px solid var(--line); }
+    .pillar:last-child { border-right: 0; }
+    .pillar-num { color: var(--teal-700); font-size: 17px; font-weight: 800; }
+    .pillar h3 { margin-top: 14px; }
+    .pillar p { margin-bottom: 0; color: var(--muted); font-size: 19px; line-height: 1.55; }
+
+    .roles-table, .scope-table, .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--white);
+      table-layout: fixed;
+    }
+
+    .roles-table th, .scope-table th, .result-table th {
+      padding: 16px 20px;
+      background: var(--navy-900);
+      color: var(--white);
+      text-align: left;
+      font-size: 17px;
+      border-right: 1px solid rgba(255, 255, 255, .23);
+    }
+
+    .roles-table th:last-child, .scope-table th:last-child, .result-table th:last-child { border-right: 0; }
+    .roles-table td, .scope-table td, .result-table td { padding: 19px 20px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 18px; line-height: 1.48; }
+    .roles-table tr:last-child td, .scope-table tr:last-child td, .result-table tr:last-child td { border-bottom: 0; }
+    .roles-table td:first-child, .scope-table td:first-child { color: var(--navy-900); font-weight: 800; }
+
+    .roles-table .role-cell { display: flex; align-items: center; gap: 14px; }
+    .role-mark { width: 12px; height: 38px; background: var(--teal-700); }
+    .roles-table tr:nth-child(even) .role-mark { background: var(--burgundy-700); }
+
+    .stance-layout {
+      display: grid;
+      grid-template-columns: .72fr 1.28fr;
+      height: 100%;
+      gap: 46px;
+    }
+
+    .stance-statement {
+      padding: 38px 42px;
+      background: var(--burgundy-700);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .stance-statement small { margin-bottom: 22px; color: #f0cbd2; font-size: 17px; font-weight: 800; }
+    .stance-statement p { margin: 0; font-family: "Noto Serif TC", "PMingLiU", serif; font-size: 37px; font-weight: 800; line-height: 1.5; }
+    .stance-statement .clarify { margin-top: 30px; font-family: inherit; font-size: 18px; font-weight: 500; line-height: 1.6; color: #f7e9ec; }
+
+    .scope-table th:first-child { width: 24%; }
+    .scope-table th:nth-child(2) { width: 34%; }
+    .scope-table td { padding-top: 22px; padding-bottom: 22px; }
+
+    .timeline {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 28px;
+      padding-top: 48px;
+    }
+
+    .timeline::before { content: ""; position: absolute; top: 72px; left: 10%; right: 10%; height: 3px; background: var(--line); }
+
+    .timeline-item { position: relative; z-index: 1; padding: 0 12px; }
+    .timeline-dot { width: 50px; height: 50px; display: grid; place-items: center; margin-bottom: 23px; border: 8px solid var(--paper); outline: 3px solid var(--teal-700); background: var(--white); color: var(--teal-700); font-size: 17px; font-weight: 800; border-radius: 50%; }
+    .timeline-item:nth-child(2) .timeline-dot { outline-color: var(--burgundy-700); color: var(--burgundy-700); }
+    .timeline-item h3 { min-height: 67px; margin-bottom: 12px; }
+    .timeline-item p { margin: 14px 0 0; color: var(--muted); font-size: 18px; line-height: 1.5; }
+
+    .timeline-conclusion {
+      margin-top: 48px;
+      padding: 22px 28px;
+      border-left: 7px solid var(--teal-700);
+      background: #eaf3f2;
+      color: var(--navy-900);
+      font-size: 23px;
+      line-height: 1.5;
+      font-weight: 800;
+    }
+
+    .layers {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 60px;
+      height: 100%;
+      align-items: center;
+    }
+
+    .layer-stack { display: flex; flex-direction: column-reverse; gap: 10px; }
+    .layer { min-height: 78px; padding: 16px 25px; display: grid; grid-template-columns: 170px 1fr; align-items: center; background: var(--white); border-left: 8px solid var(--teal-700); box-shadow: 0 3px 10px rgba(18, 42, 61, .07); }
+    .layer:nth-child(2), .layer:nth-child(4) { border-left-color: var(--burgundy-700); }
+    .layer strong { color: var(--navy-900); font-size: 20px; }
+    .layer span { color: var(--muted); font-size: 18px; line-height: 1.45; }
+
+    .security-note { padding: 44px 42px; border: 1px solid var(--line); background: var(--white); }
+    .security-note .label { color: var(--burgundy-700); font-size: 16px; font-weight: 800; }
+    .security-note h3 { margin-top: 18px; font-size: 31px; }
+    .security-note p { margin-bottom: 0; color: var(--muted); font-size: 21px; line-height: 1.65; }
+    .security-note .callout { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--teal-700); font-weight: 800; }
+
+    .result-table th:first-child { width: 24%; }
+    .result-table th:nth-child(2) { width: 50%; }
+    .result-table th:last-child { width: 26%; }
+    .result-table td:first-child { color: var(--navy-900); font-weight: 800; }
+    .result-table td:last-child { font-weight: 800; }
+
+    .status-complete { color: var(--teal-700); }
+    .status-direction { color: var(--navy-700); }
+    .status-next { color: var(--burgundy-700); }
+
+    .closing {
+      color: var(--white);
+      background: var(--navy-900);
+    }
+
+    .closing::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 35%;
+      height: 100%;
+      background: rgba(11, 110, 105, .28);
+      clip-path: polygon(36% 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    .closing .slide-inner { position: relative; z-index: 1; justify-content: center; padding-right: 200px; }
+    .closing .kicker { color: #87cac6; }
+    .closing h2 { max-width: 1170px; color: var(--white); font-size: 57px; line-height: 1.38; }
+    .closing-summary { max-width: 1030px; margin: 38px 0 0; color: #dce6eb; font-size: 28px; line-height: 1.65; }
+
+    .closing-tags { display: flex; gap: 14px; margin-top: 44px; }
+    .closing-tag { padding: 11px 16px; border: 1px solid rgba(255, 255, 255, .4); color: #edf3f6; font-size: 17px; }
+    .closing .footer { color: #c8d5dc; }
+    .closing .footer strong { color: var(--white); }
+
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, .13);
+      z-index: 20;
+    }
+
+    .progress-bar { width: 0; height: 100%; background: var(--teal-700); transition: width .22s ease; }
+
+    .controls {
+      position: fixed;
+      left: 50%;
+      bottom: 13px;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateX(-50%);
+      padding: 7px 9px;
+      border: 1px solid rgba(255, 255, 255, .15);
+      border-radius: 6px;
+      background: rgba(7, 22, 34, .94);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .3);
+    }
+
+    .controls button {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: #f2f5f7;
+      cursor: pointer;
+      font-size: 25px;
+      line-height: 1;
+    }
+
+    .controls button:hover, .controls button:focus-visible { background: rgba(255, 255, 255, .12); outline: none; }
+    .controls button:disabled { color: #60707b; cursor: default; }
+    .counter { min-width: 76px; padding: 0 9px; color: #d9e2e7; font-size: 15px; text-align: center; }
+    #fullscreen { font-size: 20px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .progress-bar { transition: none; }
+    }
+
+    @media print {
+      @page { size: 16in 9in; margin: 0; }
+      html, body { width: auto; height: auto; overflow: visible; background: white; }
+      .app { display: block; width: auto; height: auto; padding: 0; }
+      .stage-wrap { width: 1600px !important; height: auto !important; }
+      .stage { width: 1600px !important; height: auto !important; transform: none !important; box-shadow: none; overflow: visible; }
+      .slide { position: relative; display: block !important; width: 1600px; height: 900px; break-after: page; page-break-after: always; }
+      .controls, .progress { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+  <main class="app" aria-label="AI 應用推動與風險管理研究結案簡報">
+    <div class="stage-wrap" id="stageWrap">
+    <div class="stage" id="stage">
+      <section class="slide cover active" aria-label="封面">
+        <div class="slide-inner">
+          <div class="cover-mark">115 年業務精進提案</div>
+          <div class="cover-copy">
+            <h1>AI 應用推動<br>與風險管理</h1>
+            <p class="cover-subtitle">研究結案簡報</p>
+          </div>
+          <div class="cover-meta">
+            <div><strong>資訊處 × 法務處</strong>治理方向、使用邊界與後續承接</div>
+            <div>民國 115 年</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" aria-label="研究問題與結案定位">
+        <div class="slide-inner">
+          <header class="slide-head">
+            <div><p class="kicker">研究問題與結案定位</p><h2>研究焦點從「能不能用」推進到「如何安全使用」</h2><div class="head-rule"></div></div>
+            <div class="section-code">01</div>
+          </header>
+          <div class="content thesis">
+            <div class="thesis-main">
+              <div class="thesis-label">本案結論</div>
+              <p class="thesis-quote">公司可以導入 AI，公務使用須落在公司核准、可管理且風險可控的環境。</p>
+            </div>
+            <div class="thesis-side">
+              <div class="question-block"><span>原始問題</span><p>公司能否開放同仁使用 AI 工具，協助執行業務？</p></div>
+              <div class="question-block"><span>結案定位</span><p>本案完成治理方向與分階段推動建議，後續由 116 年執行工作承接。</p></div>
+            </div>
+          </div>
+          <footer class="footer"><strong>AI 應用推動與風險管理</strong><span>2 / 12</span></footer>
+        </div>
+      </section>
+
+      <section class="slide" aria-label="研究依據與實務觀察">
+        <div class="slide-inner">
+          <header class="slide-head">
+            <div><p class="kicker">研究依據</p><h2>法遵原則與實際使用經驗共同形成結論</h2><div class="head-rule"></div></div>
+            <div class="section-code">02</div>
+          </header>
+          <div class="content">
+            <div class="evidence-grid">
+              <article class="evidence-item"><div class="evidence-no">01</div><h3>原提案研究範圍</h3><p>法規與治理、使用情境、資安防護、資源配置及推動方式。</p></article>
+              <article class="evidence-item"><div class="evidence-no">02</div><h3>法務研析</h3><p>盤點 AI 使用涉及的個資、機密、智財、契約與責任風險。</p></article>
+              <article class="evidence-item"><div class="evidence-no">03</div><h3>115 年 SaaS 經驗</h3><p>公司已採購企業服務，實際觀察授權需求與管理落差。</p></article>
+              <article class="evidence-item"><div class="evidence-no">04</div><h3>116 年需求調查</h3><p>調查同仁使用需求，作為後續授權配置與教育安排依據。</p></article>
+            </div>
+            <p class="source-note">法制背景：<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=H0160093" target="_blank" rel="noreferrer">人工智慧基本法</a>提供治理原則，公司仍須依資料、資安與契約情境形成內部規範。</p>
+          </div>
+          <footer class="footer"><strong>AI 應用推動與風險管理</strong><span>3 / 12</span></footer>
+        </div>
+      </section>
+
+      <section class="slide" aria-label="115 年推動現況">
+        <div class="slide-inner">
+          <header class="slide-head">
+            <div><p class="kicker">實務觀察</p><h2>115 年已啟動企業 SaaS，授權仍集中於部分人員</h2><div class="head-rule"></div></div>
+            <div class="section-code">03</div>
+          </header>
+          <div class="content current-state">
+            <div class="year-panel"><div class="year">115</div><div class="label">企業 AI SaaS 已採購</div><p>公司已建立正式使用管道，並由資訊處管理企業帳號與授權。</p></div>
+            <div class="fact-list">
+              <div class="fact-row"><div class="fact-index">01</div><div><strong>正式服務已存在</strong><p>企業版提供較清楚的帳號、權限、契約與資料保護條件。</p></div></div>
+              <div class="fact-row"><div class="fact-index">02</div><div><strong>授權數量有限</strong><p>只有部分同仁取得帳號，實際業務需求未被完整承接。</p></div></div>
+              <div class="fact-row"><div class="fact-index">03</div><div><strong>需求不會因未取得授權而消失</strong><p>同仁仍會尋找其他工具完成工作，管理風險因此轉移到公司視線之外。</p></div></div>
+            </div>
+          </div>
+          <footer class="footer"><strong>AI 應用推動與風險管理</strong><span>4 / 12</span></footer>
+        </div>
+      </section>
+
+      <section class="slide" aria-label="影子 AI 風險">
+        <div class="slide-inner">
+          <header class="slide-head">
+            <div><p class="kicker">核心發現</p><h2>授權落差使 AI 使用轉入不可見的管道</h2><div class="head-rule"></div></div>
+            <div class="section-code">04</div>
+          </header>
+          <div class="content">
+            <div class="flow">
+              <article class="flow-step"><small>STEP 01</small><h3>企業授權有限</h3><p>正式帳號無法涵蓋所有需要 AI 協助的同仁。</p></article>
+              <article class="flow-step"><small>STEP 02</small><h3>業務需求持續</h3><p>摘要、翻譯、草擬與資料整理仍有即時需求。</p></article>
+              <article class="flow-step"><small>STEP 03</small><h3>轉用外部工具</h3><p>個人帳號、免費服務或未經核准工具進入公務流程。</p></article>
+              <article class="flow-step"><small>STEP 04</small><h3>形成影子 AI</h3><p>公司無法完整掌握工具、帳號、資料流向與使用紀錄。</p></article>
+            </div>
+            <div class="risk-strip">
+              <div class="risk-item"><strong>資料風險</strong><span>輸入內容可能離開可控環境</span></div>
+              <div class="risk-item"><strong>帳號風險</strong><span>無法集中授權、停權與盤點</span></div>
+              <div class="risk-item"><strong>法遵風險</strong><span>個資、機密、智財與契約不明</span></div>
+              <div class="risk-item"><strong>品質風險</strong><span>輸出未查核即進入正式文件</span></div>
+            </div>
+          </div>
+          <footer class="footer"><strong>AI 應用推動與風險管理</strong><span>5 / 12</span></footer>
+        </div>
+      </section>
+
+      <section class="slide" aria-label="研究結論">
+        <div class="slide-inner">
+          <header class="slide-head">
+            <div><p class="kicker">研究結論</p><h2>公務使用 AI 的治理原則</h2><div class="head-rule"></div></div>
+            <div class="section-code">05</div>
+          </header>
+          <div class="content principle">
+            <p class="principle-line">AI 可以協助工作；公務使用應在<mark>公司核准且可管理的環境</mark>中進行。</p>
+            <div class="pillars">
+              <article class="pillar"><div class="pillar-num">01</div><h3>核准服務</h3><p>以企業版 SaaS 作為正式使用管道，由公司掌握契約、帳號與服務條件。</p></article>
+              <article class="pillar"><div class="pillar-num">02</div><h3>資料與輸出邊界</h3><p>依資料敏感度判斷能否輸入，AI 產出須由使用者查核並負責。</p></article>
+              <article class="pillar"><div class="pillar-num">03</div><h3>集中治理</h3><p>資訊處管理授權與身分，配合使用紀錄、教育及必要技術防護。</p></article>
+            </div>
+          </div>
+          <footer class="footer"><strong>AI 應用推動與風險管理</strong><span>6 / 12</span></footer>
+        </div>
+      </section>
+
+      <section class="slide" aria-label="角色與責任">
+        <div class="slide-inner">
+          <header class="slide-head">
+            <div><p class="kicker">治理分工</p><h2>安全使用需要使用者、業務、法務與資訊共同承擔</h2><div class="head-rule"></div></div>
+            <div class="section-code">06</div>
+          </header>
+          <div class="content">
+            <table class="roles-table">
+              <thead><tr><th style="width:25%">角色</th><th style="width:39%">主要責任</th><th>實際作法</th></tr></thead>
+              <tbody>
+                <tr><td><div class="role-cell"><span class="role-mark"></span>AI 使用者</div></td><td>選用核准工具，判斷輸入資料，查核 AI 產出。</td><td>不輸入不應揭露資料；重要內容保留人工判斷。</td></tr>
+                <tr><td><div class="role-cell"><span class="role-mark"></span>業務主管／資料權責</div></td><td>確認使用情境、資料適用範圍與業務風險。</td><td>對高風險或特殊用途進行個案判斷。</td></tr>
+                <tr><td><div class="role-cell"><span class="role-mark"></span>法務／法遵</div></td><td>提供個資、機密、智財、契約與責任建議。</td><td>協助形成原則與例外處理依據。</td></tr>
+                <tr><td><div class="role-cell"><span class="role-mark"></span>資訊／資安</div></td><td>評估工具、管理帳號、維持可視性與防護。</td><td>統一授權、身分控管、紀錄盤點與技術措施。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <footer class="footer"><strong>AI 應用推動與風險管理</strong><span>7 / 12</span></footer>
+        </div>
+      </section>
+
+      <section class="slide" aria-label="個人 AI 工具立場">
+        <div class="slide-inner">
+          <header class="slide-head">
+            <div><p class="kicker">使用邊界</p><h2>個人 AI 工具不納入公司的公務使用管道</h2><div class="head-rule"></div></div>
+            <div class="section-code">07</div>
+          </header>
+          <div class="content stance-layout">
+            <div class="stance-statement"><small>公司立場</small><p>公司不對個人 AI 工具表示許可或背書。</p><p class="clarify">管理重點放在公司核准服務。未核准工具不作為處理公務或公司資料的正式途徑。</p></div>
+            <div>
+              <table class="scope-table">
+                <thead><tr><th>情境</th><th>適用原則</th><th>說明</th></tr></thead>
+                <tbody>
+                  <tr><td>公務／公司資料</td><td>使用公司核准的企業服務</td><td>由公司管理帳號、契約與必要防護。</td></tr>
+                  <tr><td>個人帳號／未核准工具</td><td>不納入公務使用範圍</td><td>公司不承諾可用，也不為其安全性背書。</td></tr>
+                  <tr><td>純私人用途</td><td>不屬本案公務治理範圍</td><td>使用公司設備或網路時，仍應遵守既有規定。</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <footer class="footer"><strong>AI 應用推動與風險管理</strong><span>8 / 12</span></footer>
+        </div>
+      </section>
+
+      <section class="slide" aria-label="116 年推動安排">
+        <div class="slide-inner">
+          <header class="slide-head">
+            <div><p class="kicker">後續承接</p><h2>116 年由開放申請與需求調查進入擴大使用</h2><div class="head-rule"></div></div>
+            <div class="section-code">08</div>
+          </header>
+          <div class="content">
+            <div class="timeline">
+              <article class="timeline-item"><div class="timeline-dot">01</div><h3>AI 使用需求調查</h3><span class="pill ongoing">進行中</span><p>盤點人員、用途、頻率及資料類型。</p></article>
+              <article class="timeline-item"><div class="timeline-dot">02</div><h3>全面開放申請</h3><span class="pill confirmed">已確定</span><p>讓有公務需求的同仁進入正式申請管道。</p></article>
+              <article class="timeline-item"><div class="timeline-dot">03</div><h3>授權配置與教育</h3><span class="pill next">後續辦理</span><p>依需求配置企業帳號，建立基本使用認知。</p></article>
+              <article class="timeline-item"><div class="timeline-dot">04</div><h3>盤點與防護評估</h3><span class="pill next">後續辦理</span><p>掌握影子 AI 樣態，評估適合的資安工具。</p></article>
+            </div>
+            <div class="timeline-conclusion">研究結案與推動工作順接：本案交付治理方向，116 年工作將其轉化為申請、授權、教育與防護措施。</div>
+          </div>
+          <footer class="footer"><strong>AI 應用推動與風險管理</strong><span>9 / 12</span></footer>
+        </div>
+      </section>
+
+      <section class="slide" aria-label="影子 AI 治理方法">
+        <div class="slide-inner">
+          <header class="slide-head">
+            <div><p class="kicker">風險控管</p><h2>影子 AI 需要正式管道、管理制度與技術可視性</h2><div class="head-rule"></div></div>
+            <div class="section-code">09</div>
+          </header>
+          <div class="content layers">
+            <div class="layer-stack">
+              <div class="layer"><strong>正式服務</strong><span>提供核准的企業 SaaS，承接合理業務需求。</span></div>
+              <div class="layer"><strong>管理制度</strong><span>說明資料邊界、責任分工、例外與違規處理。</span></div>
+              <div class="layer"><strong>使用教育</strong><span>讓同仁理解資料風險、輸出查核與使用限制。</span></div>
+              <div class="layer"><strong>技術防護</strong><span>盤點外部 AI 使用、告警、資料防護與存取控制。</span></div>
+            </div>
+            <aside class="security-note"><div class="label">導入原則</div><h3>先掌握使用樣態，再決定工具範圍</h3><p>AI 資安工具可作為後續選項，但應先釐清公司真正要看見與阻擋的風險，避免把研究結案誤寫成已完成採購或建置。</p><p class="callout">建議列為 116 年評估項目，不在本次結案宣稱落地。</p></aside>
+          </div>
+          <footer class="footer"><strong>AI 應用推動與風險管理</strong><span>10 / 12</span></footer>
+        </div>
+      </section>
+
+      <section class="slide" aria-label="原提案與成果對照">
+        <div class="slide-inner">
+          <header class="slide-head">
+            <div><p class="kicker">成果對照</p><h2>原提案研究項目已形成結論或後續承接方向</h2><div class="head-rule"></div></div>
+            <div class="section-code">10</div>
+          </header>
+          <div class="content">
+            <table class="result-table">
+              <thead><tr><th>原提案項目</th><th>本案成果</th><th>結案狀態</th></tr></thead>
+              <tbody>
+                <tr><td>法規與治理基準</td><td>整理 AI 使用涉及的法律風險與治理原則。</td><td class="status-complete">完成研析</td></tr>
+                <tr><td>使用情境與效益</td><td>由 115 年企業 SaaS 經驗確認需求存在，也發現授權落差。</td><td class="status-complete">完成觀察</td></tr>
+                <tr><td>管理原則與指引</td><td>形成核准服務、資料邊界、人工查核與角色分工方向。</td><td class="status-direction">已形成方向</td></tr>
+                <tr><td>資源配置</td><td>以 116 年需求調查作為授權配置依據。</td><td class="status-next">續辦中</td></tr>
+                <tr><td>資安防護架構</td><td>提出影子 AI 治理層次，技術工具留待盤點後評估。</td><td class="status-next">後續評估</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <footer class="footer"><strong>AI 應用推動與風險管理</strong><span>11 / 12</span></footer>
+        </div>
+      </section>
+
+      <section class="slide closing" aria-label="結案">
+        <div class="slide-inner">
+          <p class="kicker">研究結案</p>
+          <h2>公司已具備推動 AI 的需求與基礎，下一階段將使用納入治理。</h2>
+          <p class="closing-summary">以核准工具承接需求，以清楚邊界管理資料，以必要防護提升可視性。研究成果由 116 年開放申請、需求調查及後續制度工作接續落實。</p>
+          <div class="closing-tags"><span class="closing-tag">企業 SaaS</span><span class="closing-tag">集中授權</span><span class="closing-tag">風險邊界</span><span class="closing-tag">影子 AI 治理</span></div>
+          <footer class="footer"><strong>資訊處 × 法務處</strong><span>12 / 12</span></footer>
+        </div>
+      </section>
+    </div>
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="簡報控制">
+    <button id="previous" type="button" title="上一頁" aria-label="上一頁">‹</button>
+    <div class="counter" aria-live="polite"><span id="currentSlide">1</span> / <span id="totalSlides">12</span></div>
+    <button id="next" type="button" title="下一頁" aria-label="下一頁">›</button>
+    <button id="fullscreen" type="button" title="全螢幕" aria-label="切換全螢幕">⛶</button>
+  </nav>
+
+  <script>
+    (() => {
+      const stage = document.getElementById('stage');
+      const stageWrap = document.getElementById('stageWrap');
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const previous = document.getElementById('previous');
+      const next = document.getElementById('next');
+      const fullscreen = document.getElementById('fullscreen');
+      const currentSlide = document.getElementById('currentSlide');
+      const totalSlides = document.getElementById('totalSlides');
+      const progressBar = document.getElementById('progressBar');
+      let index = 0;
+
+      function fitStage() {
+        const availableWidth = window.innerWidth - 48;
+        const availableHeight = window.innerHeight - 92;
+        const scale = Math.min(availableWidth / 1600, availableHeight / 900);
+        stage.style.transform = `scale(${Math.max(scale, 0.1)})`;
+        stageWrap.style.width = `${1600 * scale}px`;
+        stageWrap.style.height = `${900 * scale}px`;
+      }
+
+      function showSlide(target) {
+        index = Math.max(0, Math.min(target, slides.length - 1));
+        slides.forEach((slide, position) => slide.classList.toggle('active', position === index));
+        currentSlide.textContent = String(index + 1);
+        totalSlides.textContent = String(slides.length);
+        progressBar.style.width = `${((index + 1) / slides.length) * 100}%`;
+        previous.disabled = index === 0;
+        next.disabled = index === slides.length - 1;
+        history.replaceState(null, '', `#${index + 1}`);
+      }
+
+      function fromHash() {
+        const page = Number(location.hash.replace('#', ''));
+        return Number.isFinite(page) && page >= 1 ? page - 1 : 0;
+      }
+
+      previous.addEventListener('click', () => showSlide(index - 1));
+      next.addEventListener('click', () => showSlide(index + 1));
+      fullscreen.addEventListener('click', async () => {
+        if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+        else await document.exitFullscreen();
+        window.setTimeout(fitStage, 80);
+      });
+
+      document.addEventListener('keydown', event => {
+        if (['ArrowRight', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); showSlide(index + 1); }
+        if (['ArrowLeft', 'PageUp'].includes(event.key)) { event.preventDefault(); showSlide(index - 1); }
+        if (event.key === 'Home') { event.preventDefault(); showSlide(0); }
+        if (event.key === 'End') { event.preventDefault(); showSlide(slides.length - 1); }
+      });
+
+      window.addEventListener('resize', fitStage);
+      window.addEventListener('hashchange', () => showSlide(fromHash()));
+      fitStage();
+      showSlide(fromHash());
+    })();
+  </script>
+</body>
+</html>
